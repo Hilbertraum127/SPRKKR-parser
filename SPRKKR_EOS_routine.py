@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Imports and processes data from SPRKKR outputs for EOS calculations
-Fits the Birch-Murnaghan equation of state and exports the results Some
+Fits the Birch-Murnaghan equation of state and exports the results
 
 Author: David Redka
 Date: 2025.01.01
