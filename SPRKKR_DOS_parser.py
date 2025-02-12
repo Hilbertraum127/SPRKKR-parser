@@ -1,6 +1,19 @@
 import numpy as np
 
-fname = "AlTiCrMo10_DOS.dos"
+import tkinter as tk
+from tkinter import filedialog
+
+# Use Tkinter to allow interactive selection of the SCF ALAT data file
+root = tk.Tk()
+root.withdraw()  # Hide the extra Tkinter window
+fname = filedialog.askopenfilename(initialdir=".", title="Select a file")
+
+if fname:
+    print(f"Selected file: {fname}")
+else:
+    print("No file selected. Exiting.")
+    exit()
+
 # Full read and safe data to data_parsed
 # Read the file line by line
 # This allows for parsing any similar SPR-KKR DOS file
@@ -389,73 +402,4 @@ print(f"Exported data_tot to {fname_tot}")
 
 
 del conc_suffix, fname_bands, fname_tot
-
-#%%
-
-import matplotlib.pyplot as plt
-
-# Step 1: Display available elements from TXT_T
-print("Available elements:")
-for i, element in enumerate(TXT_T):
-    print(f"[{i}] {element}")
-
-# Step 2: Prompt the user to select elements to calculate
-selected_elements = []
-while True:
-    selection = input("Enter the index of the element to calculate (or type 'done' to finish, or 'all' for all elements): ").strip().lower()
-    if selection == 'done':
-        break
-    elif selection == 'all':
-        selected_elements = list(range(len(TXT_T)))  # Select all elements
-        print("All elements selected.")
-        break
-    elif selection.isdigit() and 0 <= int(selection) < len(TXT_T):
-        selected_elements.append(int(selection))
-        print(f"Added {TXT_T[int(selection)]}.")
-    else:
-        print("Invalid selection. Please enter a valid index, 'all', or type 'done'.")
-
-if not selected_elements:
-    print("No elements selected. Exiting.")
-    exit()
-
-# Step 3: Identify the corresponding columns in HEADER for the selected elements
-print("Identifying relevant columns in HEADER...")
-columns_to_sum = []
-for element_index in selected_elements:
-    element_name = TXT_T[element_index]
-    print(f"Processing element: {element_name}")
-    for col_index, header_entry in enumerate(HEADER):
-        if element_name in header_entry:  # Match the element name in HEADER
-            columns_to_sum.append(col_index)
-            print(f"Matched column {col_index} ({header_entry}).")
-
-if not columns_to_sum:
-    print("No matching columns found in HEADER for the selected elements. Exiting.")
-    exit()
-
-# Step 4: Sum the identified columns in data_parsed
-print("Summing relevant columns in data_parsed...")
-result_array = np.sum(data_parsed[:, columns_to_sum], axis=1)
-
-# Step 5: Create the output array
-expo = np.column_stack((data_parsed[:, 0], result_array))  # Combine energy and summed results
-
-# Plot the resulting array
-plt.figure(figsize=(8, 6))
-plt.plot(expo[:, 0], expo[:, 1], label="Summed DOS", color="blue")
-plt.xlabel("Energy (E)")
-plt.ylabel("Density of States (DOS)")
-plt.title("Summed Density of States")
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Calculate the total number of electrons by integrating DOS up to E = 0
-energy = expo[:, 0]
-dos = expo[:, 1]
-below_zero_indices = energy <= 0  # Identify indices where energy is less than or equal to zero
-integral = np.trapz(dos[below_zero_indices], energy[below_zero_indices])  # Perform numerical integration
-print(f"Total number of electrons (up to E=0): {integral}")
-
 
